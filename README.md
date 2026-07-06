@@ -667,25 +667,6 @@ This project can be adapted for several real-world applications.
 
 ---
 
-# 📖 Key Learnings
-
-During the development of this project, the following concepts were explored and implemented:
-
-- Embedded Linux Development
-- Raspberry Pi Hardware Interfacing
-- ESP32 Programming
-- UART Communication
-- Computer Vision
-- Face Recognition
-- NFC Communication
-- OLED Display Control
-- Embedded Security
-- Python Programming
-- Arduino Programming
-- IoT System Design
-
----
-
 # 📂 Documentation
 
 The repository includes complete documentation for the project.
