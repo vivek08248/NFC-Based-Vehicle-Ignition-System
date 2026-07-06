@@ -1,0 +1,8 @@
+opencv-python
+face_recognition
+numpy
+pyserial
+Adafruit-Blinka
+adafruit-circuitpython-pn532
+adafruit-circuitpython-ssd1306
+Pillow
