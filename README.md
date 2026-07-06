@@ -275,11 +275,6 @@ Vasavi College of Engineering (Autonomous), Hyderabad, India
 
 ---
 
-## 📄 License
-
-This project is released under the [MIT License](LICENSE).
-
----
 
 <div align="center">
 
