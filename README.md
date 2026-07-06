@@ -1,15 +1,5 @@
 # 🚗 3-Factor Embedded Vehicle Security System
 
-<p align="center">
-
-<img src="images/flow_diagram.png" width="900">
-
-</p>
-
-<p align="center">
-
-# 3-Factor Embedded Vehicle Security System
-
 ### Wi-Fi Proximity • NFC Authentication • Facial Recognition
 
 Secure Embedded Vehicle Access using Raspberry Pi 5 & ESP32
