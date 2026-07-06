@@ -14,7 +14,6 @@ Secure Embedded Vehicle Access using Raspberry Pi 5 & ESP32
 ![ESP32](https://img.shields.io/badge/ESP32-IoT-E7352C)
 ![Arduino](https://img.shields.io/badge/Arduino-IDE-00979D?logo=arduino)
 ![NFC](https://img.shields.io/badge/NFC-PN532-blue)
-![License](https://img.shields.io/badge/License-MIT-green)
 
 </p>
 
