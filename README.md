@@ -1,111 +1,155 @@
 <div align="center">
 
-# 🚗🔐 3-Factor Embedded Vehicle Security System
+# 🚗🔐 NFC-Based Vehicle Ignition System
 
-**Wi-Fi Proximity Detection · NFC Authentication · Facial Recognition**
-
-A multi-layered embedded vehicle ignition security system built on **Raspberry Pi 5** and **ESP32**, designed to eliminate the vulnerabilities of traditional key-based vehicle access.
+**A 3-Factor Embedded Vehicle Security System**
+### Wi-Fi Proximity Detection · NFC Authentication · Facial Recognition
 
 ![Python](https://img.shields.io/badge/Python-3.x-blue?logo=python&logoColor=white)
 ![OpenCV](https://img.shields.io/badge/OpenCV-Computer%20Vision-green?logo=opencv&logoColor=white)
 ![ESP32](https://img.shields.io/badge/ESP32-IoT-orange?logo=espressif&logoColor=white)
 ![Raspberry Pi](https://img.shields.io/badge/Raspberry%20Pi-5-red?logo=raspberrypi&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-yellow)
 ![Status](https://img.shields.io/badge/Status-Active-brightgreen)
+
+*Theme-Based Project · Department of Electronics and Communication Engineering*
+*Vasavi College of Engineering (Autonomous), Hyderabad — 2025–2026*
 
 </div>
 
 ---
 
-## 📖 Overview
+## 📖 Abstract
 
-Traditional vehicle keys are vulnerable to **theft, duplication, and unauthorized use**. This project implements a **three-factor authentication pipeline** that a vehicle must pass before the ignition system is enabled:
+Conventional vehicle keys carry a significant security risk — they can be **lost, duplicated, or stolen**. This project implements an advanced ignition system that replaces the mechanical key with a **two-tier digital authentication pipeline**, layered on top of a **Wi-Fi proximity trigger**, to ensure a vehicle can only be started by its verified owner.
 
-1. 📶 **Wi-Fi Proximity Detection** — confirms the owner's registered device is nearby
-2. 💳 **NFC Authentication** — verifies a registered NFC tag's UID
-3. 👤 **Facial Recognition** — confirms the driver's identity via camera
+The system runs on a **Raspberry Pi 5** paired with an **ESP32** microcontroller and a **PN532 NFC reader module**. A registered driver must:
 
-The Raspberry Pi 5 acts as the central controller, orchestrating the ESP32, NFC reader, camera, and OLED display through each authentication stage before granting ignition access.
+1. Be **detected in proximity** via the ESP32's Wi-Fi access point
+2. **Tap an authorized NFC card**, which is verified against a stored ID database
+3. Pass a **facial recognition check** against the driver's stored face encoding
+
+Only when **all three checks pass** does the Raspberry Pi signal the ignition relay to enable engine start. A failed NFC scan or face mismatch keeps the ignition locked — and repeated failures trigger a local security alarm.
 
 ---
 
-## 🖼️ System Architecture
+## 🖼️ System Flow
 
 <p align="center">
-  <img src="https://github.com/vivek08248/NFC-Based-Vehicle-Ignition-System/raw/main/images/flow_diagram.png" alt="System Flow Diagram" width="600">
+  <img src="images/flow_diagram.png" alt="Process Flow Diagram" width="750">
 </p>
 
 ```
-User Approaches Vehicle
-        │
-        ▼
-ESP32 detects Wi-Fi Device
-        │
-        ▼
-Raspberry Pi wakes up
-        │
-        ▼
-User taps NFC Card
-        │
-        ▼
-UID Verification
-        │
-        ▼
-Face Recognition
-        │
-        ▼
-Authentication Decision
-   ┌────────┴────────┐
-   │                 │
-   ▼                 ▼
-Access Granted    Access Denied
-   │                 │
-   ▼                 ▼
-Engine Start      Alarm & Lockout
+          User Approaches Vehicle
+                    │
+                    ▼
+      ESP32 Wi-Fi Access Point detects device
+              (sends "USER_PRESENT")
+                    │
+                    ▼
+        Raspberry Pi wakes / activates PN532
+                    │
+                    ▼
+           User taps NFC Card / Phone
+                    │
+                    ▼
+       ESP32 reads UID → sends to Raspberry Pi
+                    │
+                    ▼
+        UID verified against driver database
+             │                    │
+         Invalid                Valid
+             │                    │
+             ▼                    ▼
+      "Unknown Key"        Camera activates
+      Ignition OFF                │
+                                  ▼
+                     Face captured & encoded
+                                  │
+                                  ▼
+                  Compared against stored encodings
+                 │                              │
+            No Match                        Match
+                 │                              │
+                 ▼                              ▼
+          Access Denied                 Access Granted
+          Ignition OFF               → Engine Start Enabled
+                 │
+                 ▼
+    3 failed attempts → Local alarm + lockout timer
 ```
 
 ---
 
-## ✨ Features
+## ✨ Key Features
 
-- 🔐 Three-factor authentication (Wi-Fi + NFC + Face)
-- 📶 Wi-Fi proximity detection using ESP32
-- 💳 NFC-based user verification
-- 🧠 Facial recognition using OpenCV
-- 🖥️ OLED real-time status display
-- ➕ User registration mode
-- 🚨 Local security alarm after repeated failures
-- 🗂️ Driver database management
-- 🔋 Low-power architecture
-- 🧩 Modular embedded software design
+- 🛰️ **Wi-Fi proximity trigger** — system arms only when the owner's device is detected nearby (ESP32 SoftAP client detection)
+- 💳 **NFC authentication** — UID verification via PN532 reader over UART
+- 🧠 **Facial recognition** — `face_recognition` + OpenCV encoding comparison with configurable tolerance
+- 🚨 **Anti-brute-force lockout** — local alarm and lockout timer after repeated failed attempts (`MAX_FAILED_ATTEMPTS`)
+- 🕵️ **UID masking** — driver card UIDs are masked in console output for privacy
+- ➕ **Live driver registration mode** — register new NFC cards and face encodings from the console menu
+- 💾 **Persistent driver database** — face encodings stored locally via `pickle`
+- 🔋 **Power-aware ESP32 firmware** — CPU frequency capped to reduce power spikes
 
 ---
 
 ## 🧰 Hardware Components
 
-| Component | Purpose |
+| Component | Role |
 |---|---|
-| Raspberry Pi 5 | Main processing unit |
-| ESP32 Development Board | Wi-Fi proximity detection |
-| PN532 NFC Reader | NFC authentication |
-| USB Webcam | Facial recognition |
-| SSD1306 OLED Display | System status display |
-| NFC Tags | Driver authentication |
-| USB-to-TTL Adapter | UART communication |
-| Power Supply | Raspberry Pi power |
+| **Raspberry Pi 5** | Central controller — runs authentication logic, camera, and face recognition |
+| **ESP32 Dev Module** | Hosts Wi-Fi SoftAP for proximity detection; relays serial signals to the Pi |
+| **PN532 NFC Reader** (UART) | Reads NFC card/phone UID for authentication |
+| **USB Webcam** | Captures driver's face for recognition |
+| **Ignition Relay/Driver Circuit** | Switched on by the Pi once authentication succeeds |
+| **USB-to-UART Adapter** | Serial link between Raspberry Pi and PN532/ESP32 |
 
 <table>
 <tr>
-<td align="center">
-<img src="https://github.com/vivek08248/NFC-Based-Vehicle-Ignition-System/raw/main/images/raspberry_pi5.png" width="300" alt="Raspberry Pi 5"><br>
-<b>Raspberry Pi 5</b>
+<td align="center" width="50%">
+<img src="images/raspberry_pi5.png" width="320" alt="Raspberry Pi 5"><br>
+<b>Raspberry Pi 5 — Main Controller</b>
 </td>
-<td align="center">
-<img src="https://github.com/vivek08248/NFC-Based-Vehicle-Ignition-System/raw/main/images/esp32.png" width="300" alt="ESP32"><br>
-<b>ESP32</b>
+<td align="center" width="50%">
+<img src="images/esp32.png" width="320" alt="ESP32 Dev Board"><br>
+<b>ESP32 — Wi-Fi Proximity Node</b>
 </td>
 </tr>
 </table>
+
+---
+
+## 🛠️ Software Stack
+
+| Layer | Technology |
+|---|---|
+| Language | Python 3 (Raspberry Pi), C++ / Arduino (ESP32) |
+| Computer Vision | OpenCV (`cv2`) |
+| Face Recognition | `face_recognition` (dlib-based encodings) |
+| Numerics | NumPy |
+| Serial Comms | `pyserial` |
+| NFC Driver | Adafruit PN532 UART library |
+| Data Persistence | `pickle` (driver/face database) |
+| Firmware IDE | Arduino IDE (ESP32 Dev Module) |
+| OS | Raspberry Pi OS |
+
+---
+
+## 🔄 Authentication Pipeline — How It Works
+
+### Layer 1 — Wi-Fi Proximity (`wait_for_esp32_proximity()`)
+The ESP32 runs a SoftAP (`WiFi.softAP`) and continuously checks connected station count. When the owner's phone/device joins, it sends `USER_PRESENT` over serial (115200 baud) to the Raspberry Pi, which unblocks the main loop and proceeds — the system stays idle otherwise, saving power.
+
+### Layer 2 — NFC Verification (`init_pn532()`, `scan_local_nfc()`)
+The Raspberry Pi initializes the PN532 over UART and waits (with timeout) for a passive NFC target. On a tap, the card's UID is read and checked against the stored driver database (`mask_uid()` hides it from console logs for privacy).
+
+### Layer 3 — Facial Recognition (`capture_face()`, `authenticate_user()`)
+If the UID is valid, the Pi camera activates and searches each frame for a face using `face_recognition.face_locations`. Once detected (shown with a green "FACE DETECTED" box), the face is encoded and compared against the stored encoding for that UID within a set tolerance (default `0.5`).
+
+### Decision & Ignition Control (`main()`)
+- **Both checks pass** → console prints `ACCESS GRANTED — ENGINE START`, ignition relay is enabled
+- **Either check fails** → `failed_attempts` increments; on reaching `MAX_FAILED_ATTEMPTS` (default 3), `trigger_local_alarm()` fires a countdown lockout
+- System then resets and returns to waiting for Wi-Fi proximity
 
 ---
 
@@ -119,23 +163,22 @@ NFC-Based-Vehicle-Ignition-System
 ├── .gitignore
 │
 ├── docs
-│   ├── Project_Report.pdf
-│   └── Images
+│   └── Project_Report.pdf
 │
 ├── raspberry_pi
-│   ├── vehicle_security.py
-│   ├── sniff.py
+│   ├── TBP_NFC_ESP32_Cam.py      # Main controller: proximity + NFC + face auth
+│   ├── driver_cam.txt            # Camera/driver notes
 │   └── requirements.txt
 │
 ├── esp32
-│   └── esp32_proximity.ino
+│   └── esp32_nfc_wifi_ssid.ino   # SoftAP proximity broadcaster firmware
 │
 ├── images
 │   ├── flow_diagram.png
 │   ├── raspberry_pi5.png
 │   ├── esp32.png
-│   ├── authentication.png
-│   └── demo_output.png
+│   ├── face_detected.png
+│   └── access_granted.png
 │
 └── hardware
     └── components_list.md
@@ -143,63 +186,43 @@ NFC-Based-Vehicle-Ignition-System
 
 ---
 
-## 🛠️ Software Stack
-
-- Python 3
-- OpenCV
-- face_recognition
-- NumPy
-- PySerial
-- Pillow
-- Adafruit SSD1306 Library
-- Adafruit PN532 Library
-- Arduino IDE
-- Raspberry Pi OS
-
----
-
-## 🔄 Authentication Flow
-
-### Layer 1 — Wi-Fi Proximity
-The ESP32 continuously broadcasts a Wi-Fi access point. When the authorized device enters range, the ESP32 detects the client, sends a `USER_PRESENT` signal, and the Raspberry Pi activates.
-
-### Layer 2 — NFC Verification
-The user taps an NFC card. The PN532 reads the UID and sends it to the Raspberry Pi, which verifies it against the local driver database.
-
-### Layer 3 — Facial Recognition
-If the NFC card is valid, the camera activates, detects a face, generates a face encoding, and compares it against stored encodings. If matched, **vehicle ignition is enabled**.
-
----
-
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Raspberry Pi 5 with Raspberry Pi OS installed
-- ESP32 with Arduino IDE configured
-- PN532 NFC module wired via UART/I2C
-- USB webcam connected to the Pi
-- SSD1306 OLED display wired via I2C
+- Raspberry Pi 5 running Raspberry Pi OS, with a USB webcam attached
+- ESP32 Dev Module + Arduino IDE (2.x recommended)
+- PN532 NFC module wired to the Pi over UART
+- Python 3 environment on the Pi
 
-### Setup
-
+### 1. Clone the repository
 ```bash
-# Clone the repository
 git clone https://github.com/vivek08248/NFC-Based-Vehicle-Ignition-System.git
 cd NFC-Based-Vehicle-Ignition-System
+```
 
-# Install Python dependencies (on Raspberry Pi)
+### 2. Flash the ESP32 firmware
+Open `esp32/esp32_nfc_wifi_ssid.ino` in the Arduino IDE, set your desired `ssid` / `password` for the SoftAP, select **ESP32 Dev Module**, and upload.
+
+### 3. Install Raspberry Pi dependencies
+```bash
 cd raspberry_pi
 pip install -r requirements.txt
+# Typical deps: opencv-python face_recognition numpy pyserial adafruit-circuitpython-pn532
 ```
 
-1. Flash `esp32/esp32_proximity.ino` onto the ESP32 using the Arduino IDE.
-2. Update Wi-Fi credentials and device MAC address in the ESP32 sketch.
-3. Register authorized NFC tags and face encodings using the registration mode.
-4. Run the main controller script on the Raspberry Pi:
+### 4. Configure serial ports
+Update the fixed port mappings at the top of `TBP_NFC_ESP32_Cam.py`:
+```python
+ESP32_PORT = "/dev/ttyUSB1"
+PN532_PORT = "/dev/ttyUSB0"
+BAUD_RATE  = 115200
+```
 
+### 5. Run the system
 ```bash
-python3 vehicle_security.py
+python3 TBP_NFC_ESP32_Cam.py
 ```
+On first run, use the on-screen menu to **register a new driver** (captures NFC UID + face encoding). On subsequent runs, tap the registered card and let the camera verify your face to unlock ignition.
 
 ---
 
@@ -207,62 +230,55 @@ python3 vehicle_security.py
 
 <table>
 <tr>
-<td align="center">
-<img src="https://github.com/vivek08248/NFC-Based-Vehicle-Ignition-System/raw/main/images/authentication.png" width="400" alt="Face Authentication"><br>
-<b>Face Authentication</b>
+<td align="center" width="50%">
+<img src="images/face_detected.png" width="380" alt="Face Detected"><br>
+<b>Live face detection during authentication</b>
 </td>
-<td align="center">
-<img src="https://github.com/vivek08248/NFC-Based-Vehicle-Ignition-System/raw/main/images/demo_output.png" width="400" alt="Successful System Execution"><br>
-<b>Successful System Execution</b>
+<td align="center" width="50%">
+<img src="images/access_granted.png" width="380" alt="Access Granted"><br>
+<b>Successful dual-factor match → Engine Start</b>
 </td>
 </tr>
 </table>
 
----
-
-## 🔒 Security Features
-
-- Multi-factor authentication
-- Unauthorized user detection
-- Face encoding database
-- Secure UID masking
-- Local lockout timer
-- Alarm on repeated failures
-- Modular authentication pipeline
+**Observed behavior:**
+- Unknown/unregistered NFC card → `"Unknown Key. Please register first."`, ignition remains OFF
+- Registered card + matching face → `"ACCESS GRANTED — ENGINE START"`
+- Registered card + non-matching face → access denied, failed-attempt counter increments
+- 3 consecutive failures → local alarm countdown, system resets to standby
 
 ---
 
-## 🔮 Future Improvements
+## 🎓 Conclusion
 
-- ☁️ Cloud database synchronization
-- 📱 Mobile application integration
-- 🛰️ GPS vehicle tracking
-- 🌙 Infrared camera for night operation
-- 🤖 AI-based spoof detection
-- 📝 Secure cloud logging
-- 📡 MQTT remote monitoring
-- 🚗 CAN Bus integration
+The system successfully demonstrates that combining **NFC-based possession verification** with **biometric facial recognition**, gated by a **Wi-Fi proximity trigger**, produces a materially more secure and power-efficient vehicle access model than a traditional mechanical key. Each authentication layer independently reduces the chance of unauthorized access, and their combination ensures that possessing the NFC card alone is insufficient without also matching the registered driver's face.
 
 ---
 
-## 🎯 Applications
+## 🔮 Future Scope
 
-- Smart vehicle security
-- Fleet management
-- Secure vehicle access
-- Embedded authentication systems
-- Smart transportation
-- IoT-based security
+- 🌙 Infrared / low-light imaging for night-time facial recognition
+- ☁️ Cloud upload of face captures during unauthorized access attempts
+- 📱 Companion mobile app for remote monitoring and driver management
+- 🛰️ GPS-based vehicle tracking integration
+- ⚡ Real-time hardware optimization for in-vehicle deployment
+- 🤖 Improved recognition algorithms for higher speed and accuracy
+
+---
+
+## 🌍 Sustainable Development Goals
+
+**SDG 11 — Sustainable Cities and Communities**
+By replacing vulnerable physical keys with contactless NFC + biometric authentication, this project helps reduce vehicle theft and the financial losses that come with it, while supporting the broader shift toward smart, contactless access technology in urban transportation systems.
 
 ---
 
 ## 📚 References
 
-- Face Detection and Recognition using OpenCV
-- Raspberry Pi Documentation
-- ESP32 Documentation
-- PN532 NFC Documentation
-- OpenCV Documentation
+1. I. Gupta, V. Patil, C. Kadam and S. Dumbre, "Face detection and recognition using Raspberry Pi," *IEEE WIECON-ECE*, Pune, India, 2016.
+2. J. Mihal'ov and M. Hulič, "NFC/RFID technology using Raspberry Pi as platform used in smart home project," *IEEE 14th Int. Sci. Conf. on Informatics*, Poprad, Slovakia, 2017.
+3. S. U. Masruroh, A. Fiade and I. R. Julia, "NFC Based Mobile Attendance System with Facial Authorization on Raspberry Pi and Cloud Server," *6th Int. Conf. on Cyber and IT Service Management (CITSM)*, Parapat, Indonesia, 2018.
+4. A. Kumar, S. Chaudhary, S. Sangal, and R. Dhama, "Face Detection and Recognition using OpenCV," *International Journal of Computer Applications*, vol. 184, no. 11, pp. 23–32, May 2022.
 
 ---
 
@@ -270,14 +286,17 @@ python3 vehicle_security.py
 
 **B. Praneeth Reddy** · **M. Shivanand Reddy** · **C. Vivek**
 
+**Guide:** Mr. V. Krishna Mohan, Associate Professor, E.C.E Department
+**Head of Department:** Dr. E. Sreenivasa Rao, Professor & HOD, E.C.E Department
+
 Department of Electronics and Communication Engineering
-Vasavi College of Engineering (Autonomous), Hyderabad, India
+**Vasavi College of Engineering (Autonomous)**, Ibrahimbagh, Hyderabad – 500031
+*Accredited by NAAC with 'A++' Grade*
 
 ---
 
-
 <div align="center">
 
-### ⭐ If you found this project useful, consider giving it a star on GitHub!
+### ⭐ If you found this project useful, consider giving it a star!
 
 </div>
